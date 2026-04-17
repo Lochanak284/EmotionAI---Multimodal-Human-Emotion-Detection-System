@@ -148,7 +148,7 @@ Chrome/Edge only for captions. Firefox does not support real-time captions |
 - Session-level reporting for teachers showing class engagement statistics
 - Cross-modal transformer fusion for better conflict resolution
 - Mobile and edge device deployment through model quantization
-- Multilingual support for non-English inputs
+- Multilingual support for non-English language inputs
 
 ## Authors
 Team Lead: Lochana K - 1RUA24CSE0226
