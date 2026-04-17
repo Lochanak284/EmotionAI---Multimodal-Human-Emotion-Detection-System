@@ -153,7 +153,7 @@ Chrome/Edge only for captions. Firefox does not support real-time captions |
 ## Authors
 Team Lead: Lochana K - 1RUA24CSE0226
 Team Members: 
-1. Hema B L - 1RUA24CSE0161
+1. Hema B L  - 1RUA24CSE0161
 2. M Nandini -  1RUA24CSE0230
 3. Maithri G -  1RUA24CSE0236
 
