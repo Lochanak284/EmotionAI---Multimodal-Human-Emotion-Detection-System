@@ -128,6 +128,12 @@ INFO: Uvicorn running on http://127.0.0.1:8000
 
 ### At least one parameter must be provided.
 
+### Files Not Included in GitHub Repository
+Large model files (.safetensors, .pt, .h5, .bin) are not added due to GitHub size limitations (100MB)
+backend/models/ folder is excluded to avoid uploading heavy trained models
+Environment files (.env, backend/.env) are not included to protect sensitive data like API keys
+Any secret or configuration file containing credentials is excluded for security reasons
+
 ### Known Limitations
  Voice needs expressive speech 
  Glass weared images misclassified as fear
