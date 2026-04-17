@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EmotionAI — Multimodal Emotion Detection</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo-mark">🧠</div>
+    <div>
+      <div class="logo-text">Emotion<em>AI</em></div>
+      <div class="header-sub">Multimodal · Real-time · Neural</div>
+    </div>
+    <span class="pill">MULTIMODAL v2</span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('live')">⚡ Live Analysis</button>
+    <button class="tab" onclick="switchTab('upload')">📁 Upload Files</button>
+  </div>
+
+  <div class="panel active" id="panel-live">
+    <div class="grid3">
+
+      <!-- Face -->
+      <div class="card" id="camCard">
+        <div class="card-head">
+          <div class="icon-wrap">📷</div>
+          <span class="card-title">FACE</span>
+          <span class="status-dot" id="camStatus">OFF</span>
+        </div>
+        <div id="camPreview">
+          <video id="camVideo" autoplay playsinline muted></video>
+          <canvas id="captureCanvas"></canvas>
+          <div class="cam-empty" id="camEmpty">
+            <div class="cam-empty-icon">📷</div>
+            <div>Camera off</div>
+          </div>
+        </div>
+        <button class="ctrl" id="camBtn" onclick="toggleCamera()">▶ Start Camera</button>
+      </div>
+
+      <div class="card" id="voiceCard">
+        <div class="card-head">
+          <div class="icon-wrap">🎙️</div>
+          <span class="card-title">VOICE</span>
+          <span class="status-dot" id="voiceStatus">OFF</span>
+        </div>
+        <div id="voiceViz">
+          <canvas id="voiceCanvas"></canvas>
+          <div class="v-timer" id="voiceTimer">0:00</div>
+        </div>
+        <div style="font-size:0.7em;color:var(--hint);margin-top:6px;text-align:center;position:relative;z-index:2" id="voiceHint">Records up to 20 seconds</div>
+        <button class="ctrl" id="voiceBtn" onclick="toggleRecording()">🎙️ Start Recording</button>
+        <div id="captionBox">
+          <div class="cap-label">🗣 What was heard</div>
+          <div id="captionText"></div>
+          <div id="captionLive"></div>
+        </div>
+      </div>
+
+      <!-- Text -->
+      <div class="card" id="textCard">
+        <div class="card-head">
+          <div class="icon-wrap">💬</div>
+          <span class="card-title">TEXT</span>
+          <span class="status-dot" id="textStatus">OFF</span>
+        </div>
+        <textarea class="ta" id="liveText"
+          placeholder="Type to express your emotion…&#10;&#10;Auto-analyzes after 2s pause."
+          oninput="onTextInput()"></textarea>
+        <div class="char-line">
+          <span><span id="charCount">0</span> chars</span>
+          <span class="auto-pill" id="autoPill"><span class="auto-pulse"></span>AUTO-ANALYZING</span>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="analyze" id="liveBtn" onclick="analyzeLive()">🔍 &nbsp;Analyze Emotion</button>
+  </div>
+
+  <!-- UPLOAD PANEL -->
+  <div class="panel" id="panel-upload">
+    <div class="grid3">
+      <div class="card">
+        <div class="card-head"><div class="icon-wrap">📷</div><span class="card-title">FACE IMAGE</span></div>
+        <label class="upload-zone" for="upFace" id="upFaceLabel">
+          <div class="uz-icon">🖼️</div>
+          <div>Click to choose image</div>
+          <div style="font-size:0.85em;margin-top:4px;opacity:.7">JPG, PNG supported</div>
+        </label>
+        <input type="file" id="upFace" accept="image/*" onchange="previewFile(this,'upFaceLabel')">
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="icon-wrap">🎙️</div><span class="card-title">VOICE AUDIO</span></div>
+        <label class="upload-zone" for="upVoice" id="upVoiceLabel">
+          <div class="uz-icon">🎵</div>
+          <div>Click to choose audio</div>
+          <div style="font-size:0.85em;margin-top:4px;opacity:.7">OGG, WAV, MP3</div>
+        </label>
+        <input type="file" id="upVoice" accept="audio/*" onchange="previewFile(this,'upVoiceLabel')">
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="icon-wrap">💬</div><span class="card-title">TEXT</span></div>
+        <textarea class="ta" id="upText" placeholder="Type text here…" style="min-height:130px"></textarea>
+      </div>
+    </div>
+    <button class="analyze" onclick="analyzeUpload()">🔍 &nbsp;Analyze Emotion</button>
+  </div>
+
+  <div id="loader">
+    <div class="loader-track"><div class="loader-fill"></div></div>
+    <div class="loader-text">Running multimodal inference…</div>
+  </div>
+
+  <div id="results">
+
+    <!-- Primary Emotion Hero -->
+    <div class="result-hero">
+      <div class="r-emoji" id="rEmoji">😐</div>
+      <div class="r-info">
+        <div class="r-emotion" id="rEmotion">NEUTRAL</div>
+        <div class="r-conf">Confidence: <strong id="rConf">0%</strong></div>
+        <div class="r-inputs" id="rInputs"></div>
+      </div>
+    </div>
+
+    <div class="insights-grid">
+
+      <div class="insight-card stress-card">
+        <div class="insight-header">
+          <span class="insight-icon">🧠</span>
+          <span class="insight-title">STRESS LEVEL</span>
+        </div>
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 120 70">
+            <path class="gauge-bg" d="M10,65 A55,55 0 0,1 110,65" stroke-width="10" fill="none"/>
+            <path class="gauge-fill stress-fill" id="stressArc" d="M10,65 A55,55 0 0,1 110,65" stroke-width="10" fill="none" stroke-dasharray="0 173"/>
+          </svg>
+          <div class="gauge-val" id="stressVal">0%</div>
+          <div class="gauge-label" id="stressLabel">LOW</div>
+        </div>
+        <div class="insight-detail" id="stressDetail">Analyzing stress indicators…</div>
+      </div>
+
+      <div class="insight-card engage-card">
+        <div class="insight-header">
+          <span class="insight-icon">⚡</span>
+          <span class="insight-title">ENGAGEMENT</span>
+        </div>
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 120 70">
+            <path class="gauge-bg" d="M10,65 A55,55 0 0,1 110,65" stroke-width="10" fill="none"/>
+            <path class="gauge-fill engage-fill" id="engageArc" d="M10,65 A55,55 0 0,1 110,65" stroke-width="10" fill="none" stroke-dasharray="0 173"/>
+          </svg>
+          <div class="gauge-val" id="engageVal">0%</div>
+          <div class="gauge-label" id="engageLabel">LOW</div>
+        </div>
+        <div class="insight-detail" id="engageDetail">Analyzing engagement signals…</div>
+      </div>
+
+
+      <div class="insight-card empathy-card">
+        <div class="insight-header">
+          <span class="insight-icon">🤝</span>
+          <span class="insight-title">HOW TO RESPOND</span>
+        </div>
+        <div class="empathy-body">
+          <div class="empathy-text" id="empathyText">
+            <div class="empathy-loading" id="empathyLoading">
+              <div class="emp-dots"><span></span><span></span><span></span></div>
+              <div style="font-size:0.72em;color:var(--hint);margin-top:6px;">Generating empathy response…</div>
+            </div>
+            <div id="empathyContent" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="res-card">
+      <div class="sec-label">Probability Distribution</div>
+      <div id="barsDiv"></div>
+    </div>
+
+
+    <div class="res-card">
+      <div class="sec-label">Modality Breakdown</div>
+      <div class="mod-grid" id="modGrid"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

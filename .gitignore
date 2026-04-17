@@ -1,0 +1,8 @@
+backend/models/
+*.pt
+*.bin
+*.h5
+*.safetensors
+
+.env
+backend/.env
